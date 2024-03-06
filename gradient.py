@@ -7,6 +7,7 @@ import numpy as np
 
 # Hex to RGB and RGB to Hex functions by Sachin Rastogi. 
 # https://www.codespeedy.com/convert-rgb-to-hex-color-code-in-python/
+
 def hextorgb(hex_color):
     # print(hex_color)
     hex_color = hex_color.lstrip('#')
@@ -49,6 +50,7 @@ def ask_gradients():
 ask_gradients()
 
 colors = []
+# colors = ["#fc0303","#fce803","#03fc07","#03fcf0","#030bfc","#a903fc","#fc0303"]
 x = 0
 
 for x in range(gradients):
@@ -113,16 +115,74 @@ if input("Click Event?: ").lower() == "true":
 def divide_text(txt, num_parts):
     len_total = len(txt)
     len_part = len_total // num_parts
+    # print(len_part)
     parts = []
+    temp = []
+    temp_ = ""
+    _temp_ = ""
 
     start = 0
     for i in range(num_parts):
         end = start + len_part
         if i == num_parts - 1:
-            parts.append(txt[start:])
+            # print("a")
+            temp.append(txt[start:end])
+            temp.append(txt[end:])
+            i = 0
+            j = 0
+            # print(temp)
+            while not temp[len(temp)-1] == "":
+                # print("\nwhile\n")
+                # print(f"i: {i}")
+                # print(f"j: {j}")
+                if i == 0:
+                    for x in range(len(temp)):
+                        # print(f"x: {x}")
+                        try:
+                            if not x+j+2 == len(temp):
+                                temp[x+j] += temp[x+j+1][0]
+                                temp[x+j+1] = temp[x+j+1][1:]
+                        except:
+                            # print("except")
+                            pass
+                    if j == len(temp)-1:
+                        # print(f"if j: {j}")
+                        j = 0
+                    else:
+                        # print(f"j + 1: {j+1}")
+                        j += 1
+                        i += 1
+                else:
+                    temp[len(temp)-2] += temp[len(temp)-1][0]
+                    temp[len(temp)-1] = temp[len(temp)-1][1:]
+                    i = 0
+                # print(f"result: {temp}")
+            temp.pop()
+                
         else:
-            parts.append(txt[start:end])
+            # print("b")
+            temp.append(txt[start:end])
         start = end
+    # return temp
+
+    for i in range(len(temp)-1):
+        temp_ = temp[i]
+        if i == len(temp)-2:
+            _temp_ = temp_[int(len(temp_)/2):]
+            _temp_ += temp[i+1]
+            parts.append(_temp_)
+        else:
+            if i == 0:
+                _temp_ = temp_[0:]
+            else:
+                _temp_ = temp_[int(len(temp_)/2):]
+
+            try:
+                temp_ = temp[i+1]
+                _temp_ += temp_[:int(len(temp_)/2)]
+                parts.append(_temp_)
+            except:
+                pass
 
     return parts
 divided_text = divide_text(text_, gradients)
@@ -136,11 +196,7 @@ def gradient(n):
     global hexes
 
     # Sets the number of RGB values to make in the following array.
-    if n+2 >= len(divided_text):
-        # print("penultimo")
-        divided_text[n] = divided_text[n] + divided_text[n+1]
-    else:
-        # print("no penultimo")
+    if not n+1 == len(divided_text):
         divided_text[n] = divided_text[n] + divided_text[n+1][0]
     numPoints = len(divided_text[n])
 
@@ -154,11 +210,11 @@ def gradient(n):
     for i in range(len(points)):
         hexes.append((rgbtohex(tuple(points[i]))))
 
-    if not n+2 >= len(divided_text):
+    if not n+1 == len(divided_text):
         hexes.pop()
 
-    if not n+2 >= len(divided_text):
-        n = n + 1
+    if not n+1 >= len(divided_text):
+        n += 1
         # print(hexes)
         # print(n)
         gradient(n)
@@ -167,6 +223,7 @@ gradient(0)
 
 # This mess generates the final text.
 final = '["",'
+# print(f"hexes: {hexes}")
 for i in range(len(hexes)):
     doBold = ""
     doUnderline = ""
@@ -235,6 +292,7 @@ for i in range(len(hexes)):
         doCustomFont = ""
 
     # The main beast. Generates an individual json item for each character in string:text then slaps it onto the end of the final string.
+        # print(text[i])
     final = final + '{{"text":"{}",{}{}{}{}{}{}{}"color":"#{}"}}'.format(text[i], doBold, doItalics, doUnderline, doObfuscated, doCustomFont, doStrikethrough, doClickEvent, hexes[i])
     # If this is the last character, don't add a comma. Otherwise, do!
     if i != len(hexes) - 1:
