@@ -185,7 +185,11 @@ def divide_text(txt, num_parts):
                 pass
 
     return parts
-divided_text = divide_text(text_, gradients)
+divided_text = []
+if gradients == 2:
+    divided_text.append(text_)
+else:
+    divided_text = divide_text(text_, gradients)
 # print(divided_text)
 
 # Setup the gradients:
