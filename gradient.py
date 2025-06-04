@@ -32,6 +32,41 @@ strikethrough = False
 obfuscated = False
 custom_font = False
 
+# Ask to account for the changes made to JSONs in 1.21.5 (see "https://misode.github.io/versions/?id=1.21.5&tab=changelog&tags=breaking|text")
+new_format_ask: str = input("Use 1.21.5+ JSON format? [Y/n] ").lower()
+if new_format_ask == "n":
+    new_format: bool = False
+
+    # Changes to key and items in JSONs
+    key_comma: str = '"'
+    item_comma: str = '"'
+
+    # Changes to text components names
+    hover_event_key: str = "hoverEvent"
+    click_event_key: str = "clickEvent"
+
+    # Changes to text components args
+    open_url_arg: str = "value"
+    run_command_arg: str = "value"
+    suggest_command_arg: str = "value"
+    change_page_arg: str = "value"
+else:
+    new_format: bool = True
+
+    # Changes to key and items in JSONs
+    key_comma: str = ''
+    item_comma: str = "'"
+
+    # Changes to text components names
+    hover_event_key: str = "hover_event"
+    click_event_key: str = "click_event"
+
+    # Changes to text components args
+    open_url_arg: str = "url"
+    run_command_arg: str = "command"
+    suggest_command_arg: str = "command"
+    change_page_arg: int = "page" # Must be possitive
+
 # Gets text and colors as hex code. Can only accept two colors.
 text = list(input("Text: "))
 # print(text)
@@ -40,12 +75,12 @@ text_ = str(''.join(text))
 
 def ask_gradients():
     global gradients
-    gradients = int(input("How many gradients: "))
+    gradients = int(input("Number of colors for gradients: "))
     if gradients > len(text_):
-        print("The number of gradients can't be more than the number of letters the text has.")
+        print("ERROR: The number of colors can't be greater than the number of letters the text has. Please, try again.")
         ask_gradients()
     if gradients <= 1:
-        print("The number of gradients must be greater than 1.")
+        print("ERROR: The number of colors must be greater than 1 to form a gradient. Please, try again.")
         ask_gradients()
 ask_gradients()
 
@@ -55,30 +90,30 @@ x = 0
 
 for x in range(gradients):
     # print(x)
-    colors.append(hextorgb(input(f"Color {x+1}: ")))
+    colors.append(hextorgb(input(f"Color {x+1} (hex): ")))
     # print(colors[x])
     x =+ 1
 
 # Sets decorator variables. If any of these return ANYTHING other than "true", it assumes they're false.
-if input("Bold?: ").lower() == "true":
+if input("Bold? [y/N] ").lower() == "y":
     bold = True
-if input("Underline?: ").lower() == "true":
+if input("Underline? [y/N] ").lower() == "y":
     underline = True
-if input("Italics?: ").lower() == "true":
+if input("Italics? [y/N] ").lower() == "y":
     italics = True
-if input("Strikethrough?: ").lower() == "true":
+if input("Strikethrough? [y/N] ").lower() == "y":
     strikethrough = True
-if input("Obfuscated?: ").lower() == "true":
+if input("Obfuscated? [y/N] ").lower() == "y":
     obfuscated = True
-if input("Custom Font?: ").lower() == "true":
+if input("Custom Font? [y/N] ").lower() == "y":
     custom_font = True
     font = input("Font: ")
-if input("Click Event?: ").lower() == "true":
+if input("Click Event? [y/N] ").lower() == "y":
     def ask_click_event():
         try:
             click_event = int(input("Please, select one of the following:\n[0] Url.\n[1] Run Command.\n[2] Suggest Command.\n[3] Copy to Clipboard.\n[4] Change Page (Books Only).\n"))
         except:
-            print("Invalid selection. Please choose a number between 0 and 4.")
+            print("ERROR: Invalid selection. Please choose a number between 0 and 4. Please, try again.")
             ask_click_event()
         if click_event == 0:
             global ifurl
@@ -106,7 +141,7 @@ if input("Click Event?: ").lower() == "true":
             ifchgpage = True
             chgpage = input("Page: ")
         else:
-            print("Invalid selection. Please choose a number between 0 and 4.")
+            print("ERROR: Invalid selection. Please choose a number between 0 and 4. Please, try again.")
             ask_click_event()
         return click_event
     click_event = ask_click_event()
