@@ -6,7 +6,7 @@ This python script generates a minecraft json array to make the color of the tex
 ## Features
 
 - Create a json array of multiple coloured text gradients.
-- Every json attribute (Bold, Italic...).
+- *Every* json attribute (Bold, Italic...).
 - Click Event.
 
 ## Author
