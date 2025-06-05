@@ -31,10 +31,12 @@ ifsugcmd = False
 strikethrough = False
 obfuscated = False
 custom_font = False
+ifshowtext = False
+ifshowitem = False
+ifshowentity = False
 
 # Ask to account for the changes made to JSONs in 1.21.5 (see "https://misode.github.io/versions/?id=1.21.5&tab=changelog&tags=breaking|text")
-new_format_ask: str = input("Use 1.21.5+ JSON format? [Y/n] ").lower()
-if new_format_ask == "n":
+if input("Use 1.21.5+ JSON format? [Y/n] ").lower() == "n":
     new_format: bool = False
 
     # Changes to key and items in JSONs
@@ -50,6 +52,11 @@ if new_format_ask == "n":
     run_command_arg: str = "value"
     suggest_command_arg: str = "value"
     change_page_arg: str = "value"
+
+    show_text_arg: str = "contents"
+    show_item_arg: str = "value"
+    show_entity_arg_uuid: str = "id"
+    show_entity_arg_type: str = "type"
 else:
     new_format: bool = True
 
@@ -65,7 +72,12 @@ else:
     open_url_arg: str = "url"
     run_command_arg: str = "command"
     suggest_command_arg: str = "command"
-    change_page_arg: int = "page" # Must be possitive
+    change_page_arg: str = "page" # Must be possitive
+
+    show_text_arg: str = "text"
+    show_item_arg: str = "id"
+    show_entity_arg_uuid: str = "uuid"
+    show_entity_arg_type: str = "id"
 
 # Gets text and colors as hex code. Can only accept two colors.
 text = list(input("Text: "))
@@ -111,7 +123,7 @@ if input("Custom Font? [y/N] ").lower() == "y":
 if input("Click Event? [y/N] ").lower() == "y":
     def ask_click_event():
         try:
-            click_event = int(input("Please, select one of the following:\n[0] Url.\n[1] Run Command.\n[2] Suggest Command.\n[3] Copy to Clipboard.\n[4] Change Page (Books Only).\n"))
+            click_event = int(input("Please, select one of the following:\n[0] Url\n[1] Run Command\n[2] Suggest Command\n[3] Copy to Clipboard\n[4] Change Page (Books Only)\n"))
         except:
             print("ERROR: Invalid selection. Please choose a number between 0 and 4. Please, try again.")
             ask_click_event()
@@ -119,32 +131,59 @@ if input("Click Event? [y/N] ").lower() == "y":
             global ifurl
             global url
             ifurl = True
-            url = input("Link: ")
+            url = input("Url: ")
         elif click_event == 1:
             global ifruncmd
             global command
             ifruncmd = True
-            command = input("Command: ")
+            command = input("Command to run: ")
         elif click_event == 2:
             global ifsugcmd
             global sugcmd
             ifsugcmd = True
-            sugcmd = input("Suggest: ")
+            sugcmd = input("Command to suggest: ")
         elif click_event == 3:
             global ifcopy
             global copy
             ifcopy = True
-            copy = input("Copy: ")
+            copy = input("Text to copy: ")
         elif click_event == 4:
             global ifchgpage
             global chgpage
             ifchgpage = True
-            chgpage = input("Page: ")
+            chgpage = input("Change to page: ")
         else:
             print("ERROR: Invalid selection. Please choose a number between 0 and 4. Please, try again.")
             ask_click_event()
         return click_event
     click_event = ask_click_event()
+if input("Hover Event? [y/N] ").lower() == "y":
+    def ask_hover_event():
+        try:
+            hover_event = int(input("Please, select one of the following:\n[0] Show Text\n[1] Show Item\n[2] Show Entity"))
+        except:
+            print("ERROR: Invalid selection. Please choose a number between 0 and 2. Please, try again.")
+            ask_hover_event()
+        if hover_event == 0:
+            global ifshowtext
+            global showtext
+            ifshowtext = True
+            showtext = input("Text: ")
+        elif hover_event == 1:
+            global ifshowitem
+            global showitem
+            ifshowitem = True
+            showitem = input("Item: ")
+        elif hover_event == 2:
+            global ifshowentity
+            global showentity
+            ifshowentity = True
+            showentity = input("Entity: ")
+        else:
+            print("ERROR: Invalid selection. Please choose a number between 0 and 2. Please, try again.")
+            ask_hover_event()
+        return hover_event
+    # hover_event = ask_hover_event()
 
 # Divide text in "equal" parts for each color gradient.
 def divide_text(txt, num_parts):
@@ -275,64 +314,63 @@ for i in range(len(hexes)):
 
     # Sets the strings to be used if the user sets their respective decorator variables to be true.
     if bold == True:
-        doBold = '"bold":true,'
+        doBold = f'{key_comma}bold{key_comma}:true,'
     else:
         doBold = ""
 
     if italics == True:
-        doItalics = '"italic":true,'
+        doItalics = f'{key_comma}italic{key_comma}:true,'
     else:
         doItalics = ""
 
     if underline == True:
-        doUnderline = '"underlined":true,'
+        doUnderline = f'{key_comma}underlined{key_comma}:true,'
     else:
         doUnderline = ""
         
     if ifurl == True:
-        doClickEvent = '"clickEvent":{"action":"open_url","value":"'
-        doClickEvent += f'{url}'
-        doClickEvent += '"},'
-
+        # doClickEvent = f'"clickEvent":{"action":"open_url","value":"{url}"},'
+        doClickEvent = f'{key_comma}{click_event_key}{key_comma}:{{{key_comma}action{key_comma}:{item_comma}open_url{item_comma},{key_comma}{open_url_arg}{key_comma}:{item_comma}{url}{item_comma}}},'
+    
     if ifruncmd == True:
-        doClickEvent = '"clickEvent":{"action":"run_command","value":"'
-        doClickEvent += f'{command}'
-        doClickEvent += '"},'
+        # doClickEvent = f'"clickEvent":{"action":"run_command","value":"{command}"},'
+        doClickEvent = f'{key_comma}{click_event_key}{key_comma}:{{{key_comma}action{key_comma}:{item_comma}run_command{item_comma},{key_comma}{run_command_arg}{key_comma}:{item_comma}{command}{item_comma}}},'
     
     if ifsugcmd == True:
-        doClickEvent = '"clickEvent":{"action":"suggest_command","value":"'
-        doClickEvent += f'{sugcmd}'
-        doClickEvent += '"},'
+        # doClickEvent = f'"clickEvent":{"action":"suggest_command","value":"{sugcmd}"},'
+        doClickEvent = f'{key_comma}{click_event_key}{key_comma}:{{{key_comma}action{key_comma}:{item_comma}suggest_command{item_comma},{key_comma}{suggest_command_arg}{key_comma}:{item_comma}{sugcmd}{item_comma}}},'
         
     if ifcopy == True:
-        doClickEvent = '"clickEvent":{"action":"copy_to_clipboard","value":"'
-        doClickEvent += f'{copy}'
-        doClickEvent += '"},'
+        # doClickEvent = f'"clickEvent":{"action":"copy_to_clipboard","value":"{copy}"},'
+        doClickEvent = f'{key_comma}{click_event_key}{key_comma}:{{{key_comma}action{key_comma}:{item_comma}copy_to_clipboard{item_comma},{key_comma}value{key_comma}:{item_comma}{copy}{item_comma}}},'
 
             
     if ifchgpage == True:
-        doClickEvent = '"clickEvent":{"action":"change_page","value":"'
-        doClickEvent += f'{chgpage}'
-        doClickEvent += '"},'
+        # doClickEvent = f'"clickEvent":{"action":"change_page","value":"{chgpage}"},'
+        doClickEvent = f'{key_comma}{click_event_key}{key_comma}:{{{key_comma}action{key_comma}:{item_comma}change_page{item_comma},{key_comma}{change_page_arg}{key_comma}:{item_comma}{chgpage}{item_comma}}},'
+
+    if ifshowtext == True:
+        # doClickEvent = f'"clickEvent":{"action":"change_page","value":"{chgpage}"},'
+        doClickEvent = f'{key_comma}{hover_event_key}{key_comma}:{{{key_comma}action{key_comma}:{item_comma}show_text{item_comma},{key_comma}{change_page_arg}{key_comma}:{item_comma}{chgpage}{item_comma}}},'
 
     if strikethrough == True:
-        doStrikethrough = '"strikethrough":true,'
+        doStrikethrough = f'{key_comma}strikethrough{key_comma}:true,'
     else:
         doStrikethrough = ""
 
     if obfuscated == True:
-        doObfuscated = '"obfuscated":true,'
+        doObfuscated = f'{key_comma}obfuscated{key_comma}:true,'
     else:
         doObfuscated = ""
 
     if custom_font == True:
-        doCustomFont = f'"font":"{font}",'
+        doCustomFont = f'{key_comma}font{key_comma}:{item_comma}{font}{item_comma},'
     else:
         doCustomFont = ""
 
     # The main beast. Generates an individual json item for each character in string:text then slaps it onto the end of the final string.
         # print(text[i])
-    final = final + '{{"text":"{}",{}{}{}{}{}{}{}"color":"#{}"}}'.format(text[i], doBold, doItalics, doUnderline, doObfuscated, doCustomFont, doStrikethrough, doClickEvent, hexes[i])
+    final = final + f'{{{key_comma}text{key_comma}:{item_comma}{text[i]}{item_comma},{doBold}{doItalics}{doUnderline}{doObfuscated}{doCustomFont}{doStrikethrough}{doClickEvent}{key_comma}color{key_comma}:{item_comma}#{hexes[i]}{item_comma}}}'
     # If this is the last character, don't add a comma. Otherwise, do!
     if i != len(hexes) - 1:
         final = final + ','
